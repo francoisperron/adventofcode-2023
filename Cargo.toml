@@ -1,0 +1,10 @@
+[package]
+name = "adventofcode-2023"
+version = "0.1.0"
+edition = "2021"
+authors = ["François Perron <fperron@gmail.com>"]
+description = "Advent of code 2023"
+license = "MIT"
+
+[dependencies]
+reqwest = { version = "0.11.22", features = ["blocking"] }
