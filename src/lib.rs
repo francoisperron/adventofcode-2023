@@ -2,6 +2,7 @@
 use std::env;
 
 mod day01;
+mod day02;
 
 pub fn daily_input(day: u32) -> String {
     let session = env::var("AOC_SESSION").unwrap();
