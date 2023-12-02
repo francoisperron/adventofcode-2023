@@ -28,12 +28,12 @@ impl Calibration {
     }
 
     pub fn value(&self) -> u32 {
-        return self.calculate_value(&self.line);
+        self.calculate_value(&self.line)
     }
 
     pub fn value_spelled_out(&self) -> u32 {
         let new_line = self.replace_spelled_out();
-        return self.calculate_value(&new_line);
+        self.calculate_value(&new_line)
     }
 
     fn replace_spelled_out(&self) -> String {
@@ -43,19 +43,18 @@ impl Calibration {
             ("seven", "seven7seven"), ("eight", "eight8eight"), ("nine", "nine9nine")
         ]);
 
-        let mut new_line = self.line.to_owned();
-        for d in spelled_out {
-            new_line = new_line.replace(d.0, d.1);
-        }
-        return new_line;
+        spelled_out
+            .into_iter()
+            .fold(self.line.to_owned(), |line, d| line.replace(d.0, d.1))
     }
 
-    fn calculate_value(&self, string: &String) -> u32 {
+    fn calculate_value(&self, string: &str) -> u32 {
         let mut digits = string.chars().filter_map(|c| c.to_digit(10));
 
         let first_digit = digits.next().unwrap();
         let last_digit = digits.last().unwrap_or(first_digit);
-        return first_digit * 10 + last_digit;
+
+        first_digit * 10 + last_digit
     }
 }
 
