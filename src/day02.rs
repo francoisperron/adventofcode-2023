@@ -3,6 +3,7 @@ use regex::{Captures, Regex};
 #[cfg(test)]
 mod tests {
     use crate::daily_input;
+    use super::*;
 
     fn example_input() -> Vec<&'static str> {
         vec![
@@ -13,8 +14,6 @@ mod tests {
             "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         ]
     }
-
-    use super::*;
 
     #[test]
     fn parses_max_cubes_in_a_game() {
