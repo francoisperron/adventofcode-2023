@@ -1,9 +1,11 @@
+use itertools::Itertools;
+
 #[cfg(test)]
-mod tests {
+mod part1 {
     use crate::daily_input;
     use super::*;
 
-    fn example_input() -> String {
+    pub(crate) fn example_input() -> String {
         String::from("\
             467..114..\n\
             ...*......\n\
@@ -34,7 +36,12 @@ mod tests {
     fn parses_symbols_from_schematic() {
         let schematic = Schematic::new("467..114..\n...*......\n...$.*....");
 
-        assert_eq!(schematic.symbols, vec![13, 23, 25]);
+        let expected = vec![
+            Symbol { c: '*', at: 13 },
+            Symbol { c: '$', at: 23 },
+            Symbol { c: '*', at: 25 },
+        ];
+        assert_eq!(schematic.symbols, expected);
     }
 
     #[test]
@@ -70,10 +77,30 @@ mod tests {
     }
 }
 
+#[cfg(test)]
+mod part2 {
+    use crate::daily_input;
+    use super::*;
+
+    #[test]
+    fn solves_example_part2() {
+        let schematic = Schematic::new(&part1::example_input());
+
+        assert_eq!(schematic.sum_gear_ratios(), 467835);
+    }
+
+    #[test]
+    fn solves_part2() {
+        let schematic = Schematic::new(&daily_input(3));
+
+        assert_eq!(schematic.sum_gear_ratios(), 91031374);
+    }
+}
+
 #[derive(PartialEq, Debug)]
 struct Schematic {
     parts: Vec<Part>,
-    symbols: Vec<i32>,
+    symbols: Vec<Symbol>,
     length: i32,
 }
 
@@ -82,6 +109,13 @@ struct Part {
     number: i32,
     at: Vec<i32>,
 }
+
+#[derive(PartialEq, Debug)]
+struct Symbol {
+    c: char,
+    at: i32,
+}
+
 
 impl Schematic {
     fn new(input: &str) -> Schematic {
@@ -98,7 +132,7 @@ impl Schematic {
                     Self::build_part(&mut parts, &mut part_number, i);
                 }
                 _ => {
-                    let symbol = i as i32;
+                    let symbol = Symbol { c: char, at: i as i32 };
                     symbols.push(symbol);
 
                     if part_number.is_empty() { continue; }
@@ -119,19 +153,44 @@ impl Schematic {
     }
 
     fn parts_near_symbol(&self) -> Vec<&Part> {
-        let nearby = [
-            -self.length - 1, -self.length, -self.length + 1,
-            -1, 1,
-            self.length - 1, self.length, self.length + 1
-        ];
+        let nearby = self.nearby_locations();
+        let symbols_location: Vec<i32> = self.symbols.iter().map(|s| s.at).collect();
 
         self.parts.iter().filter(|p| {
             let part_near_by: Vec<i32> = p.at.iter().flat_map(|at| nearby.iter().map(|n| *n + *at)).collect();
-            return part_near_by.iter().any(|n| self.symbols.contains(n));
+            return part_near_by.iter().any(|n| symbols_location.contains(n));
         }).collect()
+    }
+
+    fn nearby_locations(&self) -> [i32; 8] {
+        [
+            -self.length - 1, -self.length, -self.length + 1,
+            -1, 1,
+            self.length - 1, self.length, self.length + 1
+        ]
     }
 
     fn sum_part_numbers(&self) -> i32 {
         self.parts_near_symbol().iter().map(|p| p.number).sum()
+    }
+
+    fn sum_gear_ratios(&self) -> i32 {
+        let nearby = self.nearby_locations();
+        let star_locations: Vec<i32> = self.symbols.iter().filter(|s| s.c == '*').map(|s| s.at).collect();
+
+        let mut sum: i32 = 0;
+        for star_location in star_locations {
+            let parts_around: Vec<&Part> = self.parts.iter().filter(|p| {
+                let part_near_by: Vec<i32> = p.at.iter().flat_map(|at| nearby.iter().map(|n| *n + *at)).collect();
+                return part_near_by.iter().contains(&star_location);
+            }).collect();
+
+            if parts_around.len() == 2 {
+                let product: i32 = parts_around.iter().map(|p| p.number).product();
+                sum += product;
+            }
+        }
+
+        sum
     }
 }
