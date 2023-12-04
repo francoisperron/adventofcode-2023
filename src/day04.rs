@@ -124,8 +124,6 @@ impl Scratchcard {
         let count = self.count_winning();
         match count {
             0 => 0,
-            1 => 1,
-            2 => 2,
             _ => u32::pow(2, count - 1)
         }
     }
