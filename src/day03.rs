@@ -5,7 +5,7 @@ mod part1 {
     use crate::daily_input;
     use super::*;
 
-    pub(crate) fn example_input() -> String {
+    pub fn example_input() -> String {
         String::from("\
             467..114..\n\
             ...*......\n\

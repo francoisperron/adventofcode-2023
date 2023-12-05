@@ -1,10 +1,11 @@
 #![allow(dead_code)]
-use std::env;
+use std::{env, fs};
 
 mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 
 pub fn daily_input(day: u32) -> String {
     let session = env::var("AOC_SESSION").unwrap();
@@ -14,4 +15,9 @@ pub fn daily_input(day: u32) -> String {
         .header("Cookie", format!("session={}", session))
         .send().unwrap()
         .text().unwrap()
+}
+
+pub fn daily_example(day: u32) -> String {
+    fs::read_to_string(format!("src/day{:0>2}.input", day)).unwrap()
+        .parse().unwrap()
 }
