@@ -1,5 +1,3 @@
-use std::str::Split;
-
 #[cfg(test)]
 mod tests {
     use crate::daily_input;
@@ -70,8 +68,8 @@ struct Race {
 impl Races {
     pub fn from(input: &str) -> Races {
         let mut lines = input.split('\n');
-        let times: Vec<u64> = Self::parse_line(&mut lines);
-        let distances: Vec<u64> = Self::parse_line(&mut lines);
+        let times: Vec<u64> = Self::parse_line(lines.next().unwrap());
+        let distances: Vec<u64> = Self::parse_line(lines.next().unwrap());
 
         let mut races = vec![];
         for (i, time) in times.into_iter().enumerate() {
@@ -81,8 +79,11 @@ impl Races {
         Races { races }
     }
 
-    fn parse_line(lines: &mut Split<char>) -> Vec<u64> {
-        lines.next().unwrap().split_whitespace().skip(1).map(|n| n.parse().unwrap()).collect()
+    fn parse_line(line: &str) -> Vec<u64> {
+        line.split_whitespace()
+            .skip(1)
+            .map(|n| n.parse().unwrap())
+            .collect()
     }
 
     pub fn product_of_winning_ways(&self) -> u32 {
@@ -93,14 +94,16 @@ impl Races {
 impl Race {
     pub fn from(input: &str) -> Race {
         let mut lines = input.split('\n');
-        let time = Self::parse_line(&mut lines);
-        let distance = Self::parse_line(&mut lines);
+        let time = Self::parse_line(lines.next().unwrap());
+        let distance = Self::parse_line(lines.next().unwrap());
 
         Race { time, distance }
     }
 
-    fn parse_line(lines: &mut Split<char>) -> u64 {
-        lines.next().unwrap().split(':').nth(1).unwrap().replace(' ', "").parse().unwrap()
+    fn parse_line(line: &str) -> u64 {
+        line.split(':')
+            .nth(1).unwrap()
+            .replace(' ', "").parse().unwrap()
     }
 
 
