@@ -23,7 +23,7 @@ mod tests {
         let hands = Hands::from(example_input());
 
         assert_eq!(hands.hands.len(), 5);
-        assert_eq!(hands.hands.into_iter().next().unwrap(), Hand { cards: "32T3K".to_string(), bid: 765 });
+        assert_eq!(hands.hands.get(0).unwrap(), &Hand { cards: "32T3K".to_string(), bid: 765 });
     }
 
     #[test]
@@ -39,23 +39,23 @@ mod tests {
 
     #[test]
     fn calculates_cards_value() {
-        assert_eq!(Hand::new("23456").cards_value(), vec![2, 3, 4, 5, 6]);
-        assert_eq!(Hand::new("789TJ").cards_value(), vec![7, 8, 9, 10, 11]);
-        assert_eq!(Hand::new("QKAAA").cards_value(), vec![12, 13, 14, 14, 14]);
+        assert_eq!(Hand::new("23456").cards_value(m1()), vec![2, 3, 4, 5, 6]);
+        assert_eq!(Hand::new("789TJ").cards_value(m1()), vec![7, 8, 9, 10, 11]);
+        assert_eq!(Hand::new("QKAAA").cards_value(m1()), vec![12, 13, 14, 14, 14]);
     }
 
     #[test]
-    fn compares_hands_by_hand_types() {
-        let five_of_a_kind = Hand { cards: "33333".to_string(), bid: 1 };
-        let four_of_a_kind = Hand { cards: "2AAAA".to_string(), bid: 1 };
+    fn compares_hands_by_hands_type() {
+        let five_of_a_kind = Hand::new("33333");
+        let four_of_a_kind = Hand::new("2AAAA");
         assert_eq!(five_of_a_kind.cmp(&four_of_a_kind), Ordering::Greater);
         assert_eq!(four_of_a_kind.cmp(&five_of_a_kind), Ordering::Less);
     }
 
     #[test]
     fn compares_hands_by_cards_value() {
-        let starting_with_a_3 = Hand { cards: "33332".to_string(), bid: 1 };
-        let starting_with_a_2 = Hand { cards: "2AAAA".to_string(), bid: 1 };
+        let starting_with_a_3 = Hand::new("33332");
+        let starting_with_a_2 = Hand::new("2AAAA");
         assert_eq!(starting_with_a_3.cmp(&starting_with_a_2), Ordering::Greater);
         assert_eq!(starting_with_a_2.cmp(&starting_with_a_3), Ordering::Less);
     }
@@ -74,6 +74,40 @@ mod tests {
         let mut hands = Hands::from(lines);
 
         assert_eq!(hands.total_winnings(), 247815719);
+    }
+
+    #[test]
+    fn scores_hands_with_jokers() {
+        assert_eq!(Hand::new("33JJ3").score_jokers(), FiveOfAKind);
+        assert_eq!(Hand::new("2AJAA").score_jokers(), FourOfAKind);
+        assert_eq!(Hand::new("3AJA3").score_jokers(), FullHouse);
+        assert_eq!(Hand::new("TTJ98").score_jokers(), ThreeOfAKind);
+        assert_eq!(Hand::new("22334").score_jokers(), TwoPairs);
+        assert_eq!(Hand::new("2345J").score_jokers(), OnePair);
+        assert_eq!(Hand::new("23456").score_jokers(), HighCard);
+    }
+
+    #[test]
+    fn calculates_cards_value_with_jokers() {
+        assert_eq!(Hand::new("23456").cards_value(m2()), vec![2, 3, 4, 5, 6]);
+        assert_eq!(Hand::new("789TJ").cards_value(m2()), vec![7, 8, 9, 10, 0]);
+        assert_eq!(Hand::new("QKAAA").cards_value(m2()), vec![12, 13, 14, 14, 14]);
+    }
+
+    #[test]
+    fn solves_example_part2() {
+        let mut hands = Hands::from(example_input());
+
+        assert_eq!(hands.total_winnings_with_jokers(), 5905);
+    }
+
+    #[test]
+    fn solves_part2() {
+        let input = daily_input(7);
+        let lines = input.lines().collect();
+        let mut hands = Hands::from(lines);
+
+        assert_eq!(hands.total_winnings_with_jokers(), 248747492);
     }
 }
 
@@ -107,6 +141,11 @@ impl Hands {
         self.hands.sort_by(|a, b| a.cmp(b));
         self.hands.iter().enumerate().map(|(i, h)| (i + 1) as u32 * h.bid).sum()
     }
+
+    pub fn total_winnings_with_jokers(&mut self) -> u32 {
+        self.hands.sort_by(|a, b| a.cmp_jokers(b));
+        self.hands.iter().enumerate().map(|(i, h)| (i + 1) as u32 * h.bid).sum()
+    }
 }
 
 impl Hand {
@@ -121,11 +160,33 @@ impl Hand {
 
     pub fn cmp(&self, other: &Self) -> Ordering {
         self.score().cmp(&other.score())
-            .then(self.cards_value().cmp(&other.cards_value()))
+            .then(self.cards_value(m1()).cmp(&other.cards_value(m1())))
+    }
+
+    pub fn cmp_jokers(&self, other: &Self) -> Ordering {
+        self.score_jokers().cmp(&other.score_jokers())
+            .then(self.cards_value(m2()).cmp(&other.cards_value(m2())))
     }
 
     pub fn score(&self) -> HandType {
         let cards_count = self.cards.chars().counts_by(|c| c);
+        Self::match_cards_count(cards_count)
+    }
+
+
+    pub fn score_jokers(&self) -> HandType {
+        let mut cards_count = self.cards.chars().counts_by(|c| c);
+        Self::replace_wildcards(&mut cards_count);
+        Self::match_cards_count(cards_count)
+    }
+
+    fn replace_wildcards(cards_count: &mut HashMap<char, usize>) {
+        let jokers = cards_count.remove(&'J').unwrap_or(0);
+        let max_card = cards_count.iter().max_by_key(|e| e.1).map(|e| e.0).unwrap_or(&'J');
+        cards_count.entry(*max_card).and_modify(|v| { *v += jokers }).or_insert(5);
+    }
+
+    fn match_cards_count(cards_count: HashMap<char, usize>) -> HandType {
         match cards_count.values().sorted().collect_vec().as_slice() {
             [5] => HandType::FiveOfAKind,
             [1, 4] => HandType::FourOfAKind,
@@ -137,11 +198,21 @@ impl Hand {
         }
     }
 
-    pub fn cards_value(&self) -> Vec<u32> {
-        let card_values_mapping: HashMap<char, u32> = HashMap::from([
-            ('2', 2), ('3', 3), ('4', 4), ('5', 5), ('6', 6), ('7', 7), ('8', 8), ('9', 9),
-            ('T', 10), ('J', 11), ('Q', 12), ('K', 13), ('A', 14)
-        ]);
+    pub fn cards_value(&self, card_values_mapping: HashMap<char, u32>) -> Vec<u32> {
         self.cards.chars().map(|c| *card_values_mapping.get(&c).unwrap()).collect()
     }
+}
+
+fn m1() -> HashMap<char, u32> {
+    HashMap::from([
+        ('2', 2), ('3', 3), ('4', 4), ('5', 5), ('6', 6), ('7', 7), ('8', 8), ('9', 9),
+        ('T', 10), ('J', 11), ('Q', 12), ('K', 13), ('A', 14)
+    ])
+}
+
+fn m2() -> HashMap<char, u32> {
+    HashMap::from([
+        ('2', 2), ('3', 3), ('4', 4), ('5', 5), ('6', 6), ('7', 7), ('8', 8), ('9', 9),
+        ('T', 10), ('J', 0), ('Q', 12), ('K', 13), ('A', 14)
+    ])
 }
