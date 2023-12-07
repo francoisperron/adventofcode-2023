@@ -5,6 +5,7 @@ use itertools::Itertools;
 #[cfg(test)]
 mod tests {
     use crate::daily_input;
+    use crate::day07::HandType::{FiveOfAKind, FourOfAKind, FullHouse, HighCard, OnePair, ThreeOfAKind, TwoPairs};
     use super::*;
 
     fn example_input() -> Vec<&'static str> {
@@ -26,7 +27,25 @@ mod tests {
     }
 
     #[test]
-    fn compares_hands_by_number_of_kinds() {
+    fn scores_hands() {
+        assert_eq!(Hand::new("33333").score(), FiveOfAKind);
+        assert_eq!(Hand::new("2AAAA").score(), FourOfAKind);
+        assert_eq!(Hand::new("3AAA3").score(), FullHouse);
+        assert_eq!(Hand::new("TTT98").score(), ThreeOfAKind);
+        assert_eq!(Hand::new("KTJJT").score(), TwoPairs);
+        assert_eq!(Hand::new("234TT").score(), OnePair);
+        assert_eq!(Hand::new("23456").score(), HighCard);
+    }
+
+    #[test]
+    fn calculates_cards_value() {
+        assert_eq!(Hand::new("23456").cards_value(), vec![2, 3, 4, 5, 6]);
+        assert_eq!(Hand::new("789TJ").cards_value(), vec![7, 8, 9, 10, 11]);
+        assert_eq!(Hand::new("QKAAA").cards_value(), vec![12, 13, 14, 14, 14]);
+    }
+
+    #[test]
+    fn compares_hands_by_hand_types() {
         let five_of_a_kind = Hand { cards: "33333".to_string(), bid: 1 };
         let four_of_a_kind = Hand { cards: "2AAAA".to_string(), bid: 1 };
         assert_eq!(five_of_a_kind.cmp(&four_of_a_kind), Ordering::Greater);
@@ -34,43 +53,11 @@ mod tests {
     }
 
     #[test]
-    fn compares_hands_full_house() {
-        let full_house = Hand { cards: "23332".to_string(), bid: 1 };
-        let three_of_a_kind = Hand { cards: "TTT98".to_string(), bid: 1 };
-        assert_eq!(full_house.cmp(&three_of_a_kind), Ordering::Greater);
-        assert_eq!(three_of_a_kind.cmp(&full_house), Ordering::Less);
-    }
-
-    #[test]
-    fn compares_hands_two_full_house() {
-        let full_house_starting_with_3 = Hand { cards: "3AAA3".to_string(), bid: 1 };
-        let full_house_starting_with_2 = Hand { cards: "23332".to_string(), bid: 1 };
-        assert_eq!(full_house_starting_with_3.cmp(&full_house_starting_with_2), Ordering::Greater);
-        assert_eq!(full_house_starting_with_2.cmp(&full_house_starting_with_3), Ordering::Less);
-    }
-
-    #[test]
-    fn compares_hands_two_pairs() {
-        let kk677 = Hand { cards: "KK677".to_string(), bid: 1 };
-        let ktjjt = Hand { cards: "KTJJT".to_string(), bid: 1 };
-        assert_eq!(kk677.cmp(&ktjjt), Ordering::Greater);
-        assert_eq!(ktjjt.cmp(&kk677), Ordering::Less);
-    }
-
-    #[test]
-    fn compares_hands_by_cards() {
+    fn compares_hands_by_cards_value() {
         let starting_with_a_3 = Hand { cards: "33332".to_string(), bid: 1 };
         let starting_with_a_2 = Hand { cards: "2AAAA".to_string(), bid: 1 };
         assert_eq!(starting_with_a_3.cmp(&starting_with_a_2), Ordering::Greater);
         assert_eq!(starting_with_a_2.cmp(&starting_with_a_3), Ordering::Less);
-    }
-
-    #[test]
-    fn compares_hands_by_cards_faces() {
-        let starting_with_a_queen = Hand { cards: "QQQJA".to_string(), bid: 1 };
-        let starting_with_a_ten = Hand { cards: "T55J5".to_string(), bid: 1 };
-        assert_eq!(starting_with_a_queen.cmp(&starting_with_a_ten), Ordering::Greater);
-        assert_eq!(starting_with_a_ten.cmp(&starting_with_a_queen), Ordering::Less);
     }
 
     #[test]
@@ -100,6 +87,17 @@ struct Hand {
     bid: u32,
 }
 
+#[derive(Debug, PartialOrd, Ord, PartialEq, Eq)]
+enum HandType {
+    FiveOfAKind = 6,
+    FourOfAKind = 5,
+    FullHouse = 4,
+    ThreeOfAKind = 3,
+    TwoPairs = 2,
+    OnePair = 1,
+    HighCard = 0,
+}
+
 impl Hands {
     pub fn from(lines: Vec<&str>) -> Hands {
         Hands { hands: lines.into_iter().map(Hand::from).collect() }
@@ -109,65 +107,41 @@ impl Hands {
         self.hands.sort_by(|a, b| a.cmp(b));
         self.hands.iter().enumerate().map(|(i, h)| (i + 1) as u32 * h.bid).sum()
     }
-
-    pub fn total_winnings_with_jokers(&mut self) -> u32 {
-        self.hands.sort_by(|a, b| a.cmp(b));
-        self.hands.iter().enumerate().map(|(i, h)| (i + 1) as u32 * h.bid).sum()
-    }
 }
 
 impl Hand {
+    pub fn new(cards: &str) -> Hand {
+        Hand { cards: cards.to_string(), bid: 1 }
+    }
+
     pub fn from(line: &str) -> Hand {
         let mut parts = line.split_whitespace();
         Hand { cards: parts.next().unwrap().to_string(), bid: parts.next().map(|p| p.parse().unwrap()).unwrap() }
     }
 
     pub fn cmp(&self, other: &Self) -> Ordering {
-        let map = self.cards.chars().counts_by(|c| c);
-        let other_map = other.cards.chars().counts_by(|c| c);
+        self.score().cmp(&other.score())
+            .then(self.cards_value().cmp(&other.cards_value()))
+    }
 
-        if map.values().max() > other_map.values().max() {
-            return Ordering::Greater;
+    pub fn score(&self) -> HandType {
+        let cards_count = self.cards.chars().counts_by(|c| c);
+        match cards_count.values().sorted().collect_vec().as_slice() {
+            [5] => HandType::FiveOfAKind,
+            [1, 4] => HandType::FourOfAKind,
+            [2, 3] => HandType::FullHouse,
+            [1, 1, 3] => HandType::ThreeOfAKind,
+            [1, 2, 2] => HandType::TwoPairs,
+            [1, 1, 1, 2] => HandType::OnePair,
+            _ => HandType::HighCard,
         }
-        if map.values().max() < other_map.values().max() {
-            return Ordering::Less;
-        }
+    }
 
-        let full_house = *map.values().max().unwrap() == 3 && *map.values().min().unwrap() == 2;
-        let other_full_house = *other_map.values().max().unwrap() == 3 && *other_map.values().min().unwrap() == 2;
-        if full_house && !other_full_house {
-            return Ordering::Greater;
-        }
-        if !full_house && other_full_house {
-            return Ordering::Less;
-        }
-
-        let two_pairs = map.values().filter(|v| **v == 2).count() == 2;
-        let other_two_pairs = other_map.values().filter(|v| **v == 2).count() == 2;
-        if two_pairs && !other_two_pairs {
-            return Ordering::Greater;
-        }
-        if !two_pairs && other_two_pairs {
-            return Ordering::Less;
-        }
-
-        let card_values = HashMap::from([
+    pub fn cards_value(&self) -> Vec<u32> {
+        let card_values_mapping: HashMap<char, u32> = HashMap::from([
             ('2', 2), ('3', 3), ('4', 4), ('5', 5), ('6', 6), ('7', 7), ('8', 8), ('9', 9),
             ('T', 10), ('J', 11), ('Q', 12), ('K', 13), ('A', 14)
         ]);
-
-        let mut other_chars = other.cards.chars();
-        for c in self.cards.chars() {
-            let value = card_values.get(&c);
-            let other_c = other_chars.next().unwrap();
-            let other_value = card_values.get(&other_c);
-            match value.cmp(&other_value) {
-                Ordering::Greater => return Ordering::Greater,
-                Ordering::Less => return Ordering::Less,
-                _ => continue,
-            }
-        }
-
-        Ordering::Equal
+        self.cards.chars().map(|c| *card_values_mapping.get(&c).unwrap()).collect()
     }
 }
