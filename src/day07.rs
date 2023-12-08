@@ -173,7 +173,6 @@ impl Hand {
         Self::match_cards_count(cards_count)
     }
 
-
     pub fn score_jokers(&self) -> HandType {
         let mut cards_count = self.cards.chars().counts_by(|c| c);
         Self::replace_wildcards(&mut cards_count);
