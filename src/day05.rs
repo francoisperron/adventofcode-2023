@@ -33,8 +33,7 @@ mod tests {
 
     #[test]
     fn solve_part1() {
-        let mut input = daily_input(5);
-        input.pop(); // remove last eol
+        let input = daily_input(5);
         let almanac = Almanac::from(input);
 
         assert_eq!(almanac.lowest_location(), 600279879);
@@ -51,8 +50,7 @@ mod tests {
     // ran for 2 hours on my mbp...
     // #[test]
     // fn solve_part2() {
-    //     let mut input = daily_input(5);
-    //     input.pop(); // remove last eol
+    //     let input = daily_input(5);
     //     let almanac = Almanac::from_multiple_seeds(input);
     //
     //     assert_eq!(almanac.lowest_location(), 20191102);

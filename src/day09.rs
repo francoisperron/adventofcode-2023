@@ -28,8 +28,7 @@ mod tests {
 
     #[test]
     fn solves_part1() {
-        let mut input = daily_input(9);
-        input.pop();
+        let input = daily_input(9);
         let histories = Histories::from(&input);
 
         assert_eq!(histories.sum_of_extrapolated_values(), 1806615041);
@@ -51,8 +50,7 @@ mod tests {
 
     #[test]
     fn solves_part2() {
-        let mut input = daily_input(9);
-        input.pop();
+        let input = daily_input(9);
         let mut histories = Histories::from(&input);
 
         assert_eq!(histories.sum_of_previous_extrapolated_values(), 1211);

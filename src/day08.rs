@@ -27,8 +27,7 @@ mod tests {
 
     #[test]
     fn solves_part1() {
-        let mut input = daily_input(8);
-        input.pop();
+        let input = daily_input(8);
         let map = Maps::from(&input);
 
         assert_eq!(map.steps_to_reach_the_end_simple(), 14257)
@@ -67,8 +66,7 @@ mod tests {
 
     #[test]
     fn solves_part2() {
-        let mut input = daily_input(8);
-        input.pop();
+        let input = daily_input(8);
         let map = Maps::from(&input);
 
         assert_eq!(map.steps_to_reach_the_end_in_parallel(), 16187743689077)
