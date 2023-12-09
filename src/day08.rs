@@ -82,7 +82,6 @@ struct Maps {
 
 #[derive(Debug)]
 struct Node {
-    id: String,
     left: String,
     right: String,
 }
@@ -97,37 +96,37 @@ impl Maps {
             let regex = Regex::new(r"(?<id>[A-Z0-9]+) = \((?<left>[A-Z0-9]+), (?<right>[A-Z0-9]+)\)").unwrap();
             let (_, [id, left, right]) = regex.captures(line).map(|g| g.extract()).unwrap();
 
-            nodes.insert(id.to_string(), Node { id: id.to_string(), left: left.to_string(), right: right.to_string() });
+            nodes.insert(id.to_string(), Node { left: left.to_string(), right: right.to_string() });
         }
 
         Maps { instructions, nodes }
     }
 
     pub fn steps_to_reach_the_end_simple(&self) -> usize {
-        let starting_node = self.nodes.get("AAA").unwrap();
-        self.steps_to_reach_the_end(&mut &starting_node.id)
+        self.steps_to_reach_the_end("AAA")
     }
 
     pub fn steps_to_reach_the_end_in_parallel(&self) -> usize {
-        self.starting_nodes().iter_mut()
+        self.starting_nodes().iter()
             .map(|starting_node| self.steps_to_reach_the_end(starting_node))
             .fold(1, Self::lcm)
     }
 
-    fn steps_to_reach_the_end<'a>(&'a self, current_node: &'a mut &'a String) -> usize {
-        let mut count = 0;
+    fn steps_to_reach_the_end(&self, starting_node: &str) -> usize {
+        let mut steps = 0;
         let mut instructions = self.instructions.chars().cycle();
+        let mut current_node = &starting_node.to_string();
 
         while !current_node.ends_with('Z') {
-            let next_node = self.nodes.get(&current_node.to_string()).unwrap();
+            let next_node = self.nodes.get(current_node).unwrap();
             match instructions.next().unwrap() {
-                'L' => *current_node = &next_node.left,
-                'R' => *current_node = &next_node.right,
+                'L' => current_node = &next_node.left,
+                'R' => current_node = &next_node.right,
                 _ => (),
             }
-            count += 1;
+            steps += 1;
         }
-        count
+        steps
     }
 
     fn starting_nodes(&self) -> Vec<&String> {
