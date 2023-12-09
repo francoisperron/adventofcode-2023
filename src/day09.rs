@@ -43,7 +43,7 @@ mod tests {
 
     #[test]
     fn solves_example_part2() {
-        let mut histories = Histories::from(EXAMPLE_INPUT);
+        let histories = Histories::from(EXAMPLE_INPUT);
 
         assert_eq!(histories.sum_of_previous_extrapolated_values(), 2);
     }
@@ -51,7 +51,7 @@ mod tests {
     #[test]
     fn solves_part2() {
         let input = daily_input(9);
-        let mut histories = Histories::from(&input);
+        let histories = Histories::from(&input);
 
         assert_eq!(histories.sum_of_previous_extrapolated_values(), 1211);
     }
@@ -74,8 +74,8 @@ impl Histories {
         self.histories.iter().map(|h| h.extrapolated_value()).sum()
     }
 
-    pub fn sum_of_previous_extrapolated_values(&mut self) -> i32 {
-        self.histories.iter_mut().map(|h| h.previous_extrapolated_value()).sum()
+    pub fn sum_of_previous_extrapolated_values(&self) -> i32 {
+        self.histories.iter().map(|h| h.previous_extrapolated_value()).sum()
     }
 }
 
@@ -85,7 +85,17 @@ impl History {
     }
 
     pub fn extrapolated_value(&self) -> i32 {
-        let mut current_values = self.values.clone();
+        Self::extrapolate(&self.values)
+    }
+
+    pub fn previous_extrapolated_value(&self) -> i32 {
+        let mut reversed_values = self.values.to_vec();
+        reversed_values.reverse();
+        Self::extrapolate(&reversed_values)
+    }
+
+    fn extrapolate(values: &[i32]) -> i32 {
+        let mut current_values: Vec<i32> = values.to_vec();
         let mut last_values = vec![];
 
         while !current_values.iter().all(|v| *v == 0) {
@@ -99,10 +109,5 @@ impl History {
             last_values.push(last_value);
         }
         last_values.iter().sum()
-    }
-
-    pub fn previous_extrapolated_value(&mut self) -> i32 {
-        self.values.reverse();
-        self.extrapolated_value()
     }
 }
