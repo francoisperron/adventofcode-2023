@@ -78,6 +78,21 @@ L|-JF";
 
         assert_eq!(sketch.steps_to_reach_farthest_point(), 6864);
     }
+
+    #[test]
+    fn solve_examples_part2() {
+        let sketch = Sketch::from(EXAMPLE_1);
+
+        assert_eq!(sketch.enclosed_tiles(), 1);
+    }
+
+
+    #[test]
+    fn solves_part2() {
+        let sketch = Sketch::from(&daily_input(10));
+
+        assert_eq!(sketch.enclosed_tiles(), 349);
+    }
 }
 
 struct Sketch {
@@ -98,17 +113,36 @@ impl Sketch {
     }
 
     pub fn steps_to_reach_farthest_point(&self) -> u32 {
+        self.find_loop().0
+    }
+
+    pub fn enclosed_tiles(&self) -> u32 {
+        self.find_loop().1
+    }
+
+    fn find_loop(&self) -> (u32, u32) {
         let (start, _) = self.tiles.iter().find_position(|t| t.tile == 'S').unwrap();
 
+        let mut corner = Position::new(start, East, self.length);
         let mut position = Position::new(start + 1, East, self.length);
         let mut steps = 1;
+        let mut area: i32 = 0;
         while self.tiles.get(position.index).unwrap().tile != 'S' {
             let tile = self.tiles.get(position.index).unwrap();
+            if tile.tile == '7' || tile.tile == 'J' || tile.tile == 'F' || tile.tile == 'L' {
+                area += Self::shoelace(&corner, &position);
+                corner = position;
+            }
             position = tile.follow(&position);
             steps += 1;
         }
 
-        steps / 2
+        area += Self::shoelace(&corner, &position);
+        ((steps / 2) as u32, (area / 2 - steps / 2 + 1) as u32)
+    }
+
+    fn shoelace(a: &Position, b: &Position) -> i32 {
+        ((a.index % a.length) * (b.index / b.length)) as i32 - ((b.index % b.length) * (a.index / a.length)) as i32
     }
 }
 
@@ -147,7 +181,7 @@ impl Tile {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 struct Position {
     index: usize,
     direction: Direction,
@@ -160,7 +194,7 @@ impl Position {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 enum Direction {
     North,
     East,
