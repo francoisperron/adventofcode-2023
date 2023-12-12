@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use Direction::{North, South, East, West};
 
 #[cfg(test)]
@@ -121,7 +120,7 @@ impl Sketch {
     }
 
     fn find_loop(&self) -> (u32, u32) {
-        let (start, _) = self.tiles.iter().find_position(|t| t.tile == 'S').unwrap();
+        let start = self.tiles.iter().position(|t| t.tile == 'S').unwrap();
 
         let mut corner = Position::new(start, East, self.length);
         let mut position = Position::new(start + 1, East, self.length);

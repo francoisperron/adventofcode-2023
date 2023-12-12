@@ -11,6 +11,7 @@ mod day07;
 mod day08;
 mod day09;
 mod day10;
+mod day11;
 
 pub fn daily_input(day: u32) -> String {
     let session = env::var("AOC_SESSION").unwrap();
