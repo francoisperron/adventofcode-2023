@@ -25,13 +25,13 @@ mod tests {
 
     #[test]
     fn calculates_distance_between_galaxies() {
-        // assert_eq!(Universe::dist(&[1, 0, 1], 0), 2);
-        // assert_eq!(Universe::dist(&[2, 0, 1], 0), 4);
-        // assert_eq!(Universe::dist(&[1, 0, 2], 0), 4);
-        // assert_eq!(Universe::dist(&[2, 0, 2], 0), 8);
+        assert_eq!(Universe::dist(&[1, 0, 1], 0), 2);
+        assert_eq!(Universe::dist(&[2, 0, 1], 0), 4);
+        assert_eq!(Universe::dist(&[1, 0, 2], 0), 4);
+        assert_eq!(Universe::dist(&[2, 0, 2], 0), 8);
 
-        // assert_eq!(Universe::dist(&[1, 1], 0), 1);
-        // assert_eq!(Universe::dist(&[1, 1, 1], 0), 1 + 3);
+        assert_eq!(Universe::dist(&[1, 1], 0), 1);
+        assert_eq!(Universe::dist(&[1, 1, 1], 0), 1 + 3);
         assert_eq!(Universe::dist(&[1, 1, 1, 1], 0), 1 + 3 + 6);
     }
 
@@ -103,7 +103,7 @@ impl Universe {
         Self::dist(&self.lines, expand) + Self::dist(&self.columns, expand)
     }
 
-    fn dist(galaxies: &[usize], expand: usize) -> usize { // [2, 0, 1]
+    fn dist(galaxies: &[usize], expand: usize) -> usize {
         let mut distance = 0;
         let mut total_galaxies = 0;
         let mut previous_total_galaxies_expansion = 0;
