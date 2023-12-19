@@ -30,14 +30,14 @@ mod tests {
         ..#.\n\
         #..#");
 
-        assert_eq!(pattern.horizontal_reflection(), Some(2))
+        assert_eq!(pattern.horizontal_reflection(0), Some(2))
     }
 
     #[test]
     fn finds_example_horizontal_reflection() {
         let pattern = Pattern::from(EXAMPLE.split("\n\n").nth(1).unwrap());
 
-        assert_eq!(pattern.horizontal_reflection(), Some(4))
+        assert_eq!(pattern.horizontal_reflection(0), Some(4))
     }
 
     #[test]
@@ -47,28 +47,60 @@ mod tests {
         .##.\n\
         #..#");
 
-        assert_eq!(pattern.vertical_reflection(), Some(2))
+        assert_eq!(pattern.vertical_reflection(0), Some(2))
     }
 
     #[test]
     fn finds_example_vertical_reflection() {
         let pattern = Pattern::from(EXAMPLE.split("\n\n").next().unwrap());
 
-        assert_eq!(pattern.vertical_reflection(), Some(5))
+        assert_eq!(pattern.vertical_reflection(0), Some(5))
     }
 
     #[test]
     fn solves_example_part1() {
         let patterns = Patterns::from(EXAMPLE);
 
-        assert_eq!(patterns.summarize(), 405);
+        assert_eq!(patterns.summarize(0), 405);
     }
 
     #[test]
     fn solves_part1() {
         let patterns = Patterns::from(&daily_input(13));
 
-        assert_eq!(patterns.summarize(), 35210);
+        assert_eq!(patterns.summarize(0), 35210);
+    }
+
+    #[test]
+    fn find_diff_between_two_strings() {
+        assert_eq!(Pattern::diff_between("#..#", "#..#"), 0);
+        assert_eq!(Pattern::diff_between("...#", "#..#"), 1);
+        assert_eq!(Pattern::diff_between("..##", "##.."), 4);
+    }
+
+    #[test]
+    fn finds_horizontal_reflection_smudged() {
+        let pattern = Pattern::from("\
+        ...#\n\
+        ..#.\n\
+        ..#.\n\
+        #..#");
+
+        assert_eq!(pattern.horizontal_reflection(1), Some(2))
+    }
+
+    #[test]
+    fn solves_example_part2() {
+        let patterns = Patterns::from(EXAMPLE);
+
+        assert_eq!(patterns.summarize(1), 400);
+    }
+
+    #[test]
+    fn solves_part2() {
+        let patterns = Patterns::from(&daily_input(13));
+
+        assert_eq!(patterns.summarize(1), 31974);
     }
 }
 
@@ -81,9 +113,9 @@ impl Patterns {
         Patterns { patterns: input.split("\n\n").map(Pattern::from).collect() }
     }
 
-    pub fn summarize(&self) -> usize {
+    pub fn summarize(&self, smudged: u32) -> usize {
         self.patterns.iter()
-            .map(|p| p.vertical_reflection().unwrap_or(0)+ p.horizontal_reflection().unwrap_or(0)  * 100)
+            .map(|p| p.vertical_reflection(smudged).unwrap_or(0)+ p.horizontal_reflection(smudged).unwrap_or(0)  * 100)
             .sum()
     }
 }
@@ -98,13 +130,13 @@ impl Pattern {
         Pattern { lines }
     }
 
-    pub fn horizontal_reflection(&self) -> Option<usize> {
-        Self::find_reflection(&self.lines)
+    pub fn horizontal_reflection(&self, smudged: u32) -> Option<usize> {
+        Self::find_reflection(&self.lines, smudged)
     }
 
-    pub fn vertical_reflection(&self) -> Option<usize> {
+    pub fn vertical_reflection(&self, smudged: u32) -> Option<usize> {
         let rows = self.rows_to_lines();
-        Self::find_reflection(&rows)
+        Self::find_reflection(&rows, smudged)
     }
 
     fn rows_to_lines(&self) -> Vec<String> {
@@ -116,7 +148,7 @@ impl Pattern {
         rows
     }
 
-    fn find_reflection(vec: &Vec<String>) -> Option<usize> {
+    fn find_reflection(vec: &Vec<String>, smudged: u32) -> Option<usize> {
         for i in 1..vec.len() {
             let (a, b) = vec.split_at(i);
             let a: String = a.iter().rev().map(|s| s.to_string()).collect();
@@ -124,10 +156,16 @@ impl Pattern {
 
             let min = *[a.len(), b.len()].iter().min().unwrap();
 
-            if a.split_at(min).0 == b.split_at(min).0 {
+            if Self::diff_between(a.split_at(min).0, b.split_at(min).0) == smudged {
                 return Some(i);
             }
         }
         None
+    }
+
+    fn diff_between(a: &str, b: &str) -> u32 {
+        a.chars().zip(b.chars())
+            .filter(|(a, b)| a != b)
+            .count() as u32
     }
 }
