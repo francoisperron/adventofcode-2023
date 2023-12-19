@@ -47,14 +47,15 @@ mod tests {
         assert_eq!(almanac.lowest_location(), 46);
     }
 
-    // ran for 2 hours on my mbp...
-    // #[test]
-    // fn solve_part2() {
-    //     let input = daily_input(5);
-    //     let almanac = Almanac::from_multiple_seeds(input);
-    //
-    //     assert_eq!(almanac.lowest_location(), 20191102);
-    // }
+    //ran for 2 hours on my mbp...
+    #[test]
+    #[ignore]
+    fn solve_part2() {
+        let input = daily_input(5);
+        let almanac = Almanac::from_multiple_seeds(input);
+
+        assert_eq!(almanac.lowest_location(), 20191102);
+    }
 }
 
 #[derive(PartialEq, Debug)]
