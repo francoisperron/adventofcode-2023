@@ -115,7 +115,7 @@ impl Patterns {
 
     pub fn summarize(&self, smudged: u32) -> usize {
         self.patterns.iter()
-            .map(|p| p.vertical_reflection(smudged).unwrap_or(0)+ p.horizontal_reflection(smudged).unwrap_or(0)  * 100)
+            .map(|p| p.vertical_reflection(smudged).unwrap_or(0) + p.horizontal_reflection(smudged).unwrap_or(0) * 100)
             .sum()
     }
 }
