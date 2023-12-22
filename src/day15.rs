@@ -205,9 +205,7 @@ impl Boxes {
 
     pub fn remove(&mut self, lens: &Lens) {
         if let Some(lenses) = self.boxes.get_mut(&lens.box_index) {
-            if let Some(box_index) = lenses.iter().position(|l| l.label == lens.label) {
-                lenses.remove(box_index);
-            }
+            lenses.retain(|l| l.label != lens.label);
         }
     }
 
