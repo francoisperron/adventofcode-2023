@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+pub mod daily;
 mod day01;
 mod day02;
 mod day03;
@@ -15,4 +16,4 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
-pub mod daily;
+mod day17;
