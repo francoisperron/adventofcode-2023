@@ -4,7 +4,7 @@ use regex::Regex;
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use crate::day08::Maps;
 
     const EXAMPLE_INPUT: &str = "LLR\n\nAAA = (BBB, BBB)\nBBB = (AAA, ZZZ)\nZZZ = (ZZZ, ZZZ)";

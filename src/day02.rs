@@ -2,7 +2,7 @@ use regex::{Captures, Regex};
 
 #[cfg(test)]
 mod tests {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use super::*;
 
     fn example_input() -> Vec<&'static str> {

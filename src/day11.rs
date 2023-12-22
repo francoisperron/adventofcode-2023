@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use crate::day11::Universe;
 
     const EXAMPLE_INPUT: &str = "\

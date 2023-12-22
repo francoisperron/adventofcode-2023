@@ -2,7 +2,7 @@ use Direction::{North, South, East, West};
 
 #[cfg(test)]
 mod tests {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use crate::day10::{Direction, Position, Sketch, Tile};
     use Direction::{North, South, East, West};
 

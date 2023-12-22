@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 #[cfg(test)]
 mod tests {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use crate::day14::Rocks;
 
     const EXAMPLE: &str = "\

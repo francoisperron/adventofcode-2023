@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 #[cfg(test)]
 mod part1 {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use super::*;
 
     pub fn example_input() -> String {
@@ -79,7 +79,7 @@ mod part1 {
 
 #[cfg(test)]
 mod part2 {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use super::*;
 
     #[test]

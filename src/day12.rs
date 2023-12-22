@@ -4,7 +4,7 @@ use crate::day12::Spring::{Damaged, Operational, Unknown};
 
 #[cfg(test)]
 mod tests {
-    use crate::daily_input;
+    use crate::daily::daily_input;
     use crate::day12::{HotSprings, Row};
     use crate::day12::Spring::{Damaged, Operational, Unknown};
 
