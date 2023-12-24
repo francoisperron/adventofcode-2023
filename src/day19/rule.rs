@@ -1,5 +1,3 @@
-use regex::Regex;
-
 #[derive(Debug)]
 pub struct Rule {
     pub part: char,
@@ -19,10 +17,14 @@ impl Rule {
     }
 
     pub fn from_greater_or_less(input: &str) -> Rule {
-        let re_main = Regex::new(r"(?<part>[a-z]+)(?<operation>[<|>])(?<rating>[0-9}]+):(?<workflow>[A-Ra-z]+)").unwrap();
-        let (_, [part, operation, rating, workflow]) = re_main.captures(input).map(|g| g.extract()).unwrap();
+        let (op, workflow) = input.split_once(':').unwrap();
 
-        Rule { part: part.chars().next().unwrap(), operation: operation.to_owned(), rating: rating.parse().unwrap(), next_workflow: workflow.to_string() }
+        let mut chars = op.chars();
+        let part = chars.next().unwrap();
+        let operation = chars.next().unwrap().to_string();
+        let rating = chars.as_str().parse().unwrap();
+        let next_workflow = workflow.to_string();
+        Rule { part, operation, rating, next_workflow }
     }
 }
 

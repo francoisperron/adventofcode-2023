@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use regex::Regex;
 use crate::day19::part::Part;
 use crate::day19::rule::Rule;
 
@@ -10,9 +9,9 @@ pub struct Workflows {
 
 impl Workflows {
     pub fn from(input: &str) -> Workflows {
-        let mut split = input.split("\n\n");
-        let workflows = split.next().unwrap().lines().map(Workflow::from).collect();
-        let parts = split.next().unwrap().lines().map(Part::from).collect();
+        let (workflows, parts) = input.split_once("\n\n").unwrap();
+        let workflows = workflows.lines().map(Workflow::from).collect();
+        let parts = parts.lines().map(Part::from).collect();
         Workflows { workflows, parts }
     }
 
@@ -32,12 +31,11 @@ struct Workflow {
 
 impl Workflow {
     fn from(input: &str) -> (String, Workflow) {
-        let re_main = Regex::new(r"(?<workflow>[a-z]+)\{(?<rules>[^}]+)}").unwrap();
-        let (_, [name, rules_input]) = re_main.captures(input).map(|g| g.extract()).unwrap();
+        let (name, rules) = input.split_once('{').unwrap();
 
-        let re_rule = Regex::new(r"(?<rule>[^,]*)").unwrap();
-        let rules = re_rule.captures_iter(rules_input)
-            .map(|cap_rule| Rule::from(&cap_rule["rule"]))
+        let rules = rules.strip_suffix('}').unwrap()
+            .split(',')
+            .map(Rule::from)
             .collect();
 
         (name.to_string(), Workflow { rules })
