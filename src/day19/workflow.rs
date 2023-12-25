@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use crate::day19::part::Part;
 use crate::day19::rule::Rule;
@@ -43,9 +44,9 @@ impl Workflow {
 
     fn organize(&self, part: &mut Part) -> String {
         for rule in self.rules.iter() {
-            if !rule.operation.is_empty() {
+            if rule.operation != Ordering::Equal {
                 let part_rating = part.ratings[&rule.part];
-                if (rule.operation == ">" && part_rating > rule.rating) || (rule.operation == "<" && part_rating < rule.rating) {
+                if part_rating.cmp(&rule.rating) == rule.operation {
                     part.workflow = rule.next_workflow.clone();
                     break;
                 } else {
