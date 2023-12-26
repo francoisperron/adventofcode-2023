@@ -17,6 +17,20 @@ mod tests {
         assert_eq!(workflows.accepted_parts_ratings(), 480738);
     }
 
+    #[test]
+    fn solves_example_part2() {
+        let workflows = Workflows::from(EXAMPLE);
+
+        assert_eq!(workflows.accepted_parts_ratings_possibilities(), 167_409_079_868_000);
+    }
+
+    #[test]
+    fn solves_part2() {
+        let workflows = Workflows::from(&daily_input(19));
+
+        assert_eq!(workflows.accepted_parts_ratings_possibilities(), 131_550_418_841_958);
+    }
+
     const EXAMPLE: &str = "\
 px{a<2006:qkq,m>2090:A,rfg}
 pv{a>1716:R,A}
