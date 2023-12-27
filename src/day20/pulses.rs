@@ -4,9 +4,10 @@ pub struct Pulses {
     pulses: VecDeque<Pulse>,
     pub highs: usize,
     pub lows: usize,
+    pub history: Vec<Pulse>
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Pulse {
     pub pulse_type: PulseType,
     pub source: String,
@@ -27,12 +28,13 @@ pub enum PulseType {
 
 impl Pulses {
     pub fn new() -> Pulses {
-        Pulses { pulses: VecDeque::new(), highs: 0, lows: 0 }
+        Pulses { pulses: VecDeque::new(), highs: 0, lows: 0, history: vec![] }
     }
 
     pub fn push(&mut self, pulse: Pulse) {
         self.count(&pulse.pulse_type);
-        self.pulses.push_back(pulse);
+        self.pulses.push_back(pulse.clone());
+        self.history.push(pulse);
     }
 
     pub fn pop(&mut self) -> Option<Pulse> {

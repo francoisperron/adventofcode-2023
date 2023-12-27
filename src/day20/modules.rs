@@ -43,31 +43,42 @@ impl Modules {
         let mut total_highs = 0;
         let mut total_lows = 0;
         for _cycle in 0..cycles {
-            let (highs, lows) = self.push_button();
-            // println!("{:?} ({:?}, {:?})", _cycle, highs, lows);
-            total_highs += highs;
-            total_lows +=lows;
+            let pulses = self.push_button();
+            total_highs += pulses.highs;
+            total_lows += pulses.lows;
         }
 
         total_highs * total_lows
     }
 
-    fn push_button(&mut self) -> (usize, usize) {
+    fn push_button(&mut self) -> Pulses {
         let mut pulses = Pulses::new();
         pulses.push(Pulse::new("button", "broadcaster", PulseType::Low));
 
         while let Some(pulse) = pulses.pop() {
-            // println!("\n{:?}", pulse);
             if let Some(module) = self.modules.get_mut(&pulse.destination) {
                 let new_pulses = module.receive(&pulse);
                 for new_pulse in new_pulses {
-                    // println!("new {:?}", new_pulse);
                     pulses.push(new_pulse);
                 }
             }
         }
 
-        (pulses.highs, pulses.lows)
+        pulses
+    }
+
+    pub fn first_high_pulse(&mut self, module: &str) -> usize {
+        let mut cycle = 0;
+        loop {
+            let pulses = self.push_button();
+            cycle += 1;
+
+            if pulses.history.iter().any(|p| p.source == module && p.pulse_type == PulseType::High) {
+                break;
+            }
+        }
+
+        cycle
     }
 }
 
