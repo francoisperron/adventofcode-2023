@@ -20,6 +20,10 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Lint
+        run: |
+          cargo clippy -- -Dwarnings
+
       - name: Test
         run: |
-          AOC_SESSION=${{ secrets.AOC_SESSION }} cargo test --workspace
+          AOC_SESSION=${{ secrets.AOC_SESSION }} cargo test --release
