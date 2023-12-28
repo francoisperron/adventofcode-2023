@@ -17,6 +17,13 @@ mod tests {
         assert_eq!(map.gardens_visited(64), 3820);
     }
 
+    #[test]
+    fn solves_part2() {
+        let mut map = GardenMap::from(&daily_input(21));
+
+        assert_eq!(map.infinite_gardens_visited(26501365), 632421652138917);
+    }
+
     const EXAMPLE: &str = "\
 ...........
 .....###.#.
