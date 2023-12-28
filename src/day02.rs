@@ -82,7 +82,7 @@ impl Game {
         let regex = Regex::new(r"(Game (?<id>[0-9]+)|(?<cubes>[0-9]+) (?<color>blue|green|red))").unwrap();
         let groups: Vec<Captures> = regex.captures_iter(line).collect();
 
-        let id = groups.get(0).unwrap()["id"].parse().unwrap();
+        let id = groups.first().unwrap()["id"].parse().unwrap();
         let blue = Self::max_cubes_of_color(&groups, "blue");
         let green = Self::max_cubes_of_color(&groups, "green");
         let red = Self::max_cubes_of_color(&groups, "red");
