@@ -83,9 +83,7 @@ O.#..O.#.#
         assert_eq!(rocks.total_load_cycling(), 64);
     }
 
-    // 5 secs to run, too slow
     #[test]
-    #[ignore]
     fn solves_part2() {
         let mut rocks = Rocks::from(&daily_input(14));
 

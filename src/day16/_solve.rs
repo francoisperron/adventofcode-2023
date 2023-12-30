@@ -38,7 +38,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // 2secs
     fn solves_part2() {
         let grid = Grid::from(&daily_input(16));
 

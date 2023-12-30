@@ -115,7 +115,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn solves_part2() {
         let sequence = Sequence::from(&daily_input(15));
 
